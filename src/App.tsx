@@ -5,44 +5,19 @@
  * @format
  */
 
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
-import {
-  NativeStackNavigationProp,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import HomeScreen from './screens/HomeScreen';
+import PostScreen from './screens/PostScreen';
+import {IPost} from './components/Post';
+import DetailScreen from './screens/DetailScreen';
 
-function DetailsScreen() {
-  return (
-    <View style={styles.sectionContainer}>
-      <Text>Details Screen</Text>
-    </View>
-  );
-}
-type ProfileScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'Home'
->;
-
-function HomeScreen() {
-  const navigation = useNavigation<ProfileScreenNavigationProp>();
-  return (
-    <View style={styles.sectionContainer}>
-      <Text>Home Screen</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Detail')}>
-        <Text style={styles.titleButton}>Open Detail Screen </Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-type RootStackParamList = {
+export type RootStackParamList = {
   Home: undefined;
-  Detail: undefined;
+  Detail: {data: string};
+  Post: {data: IPost};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -51,28 +26,33 @@ function App(): React.JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Detail" component={DetailsScreen} />
+        <Stack.Screen
+          name="Home"
+          options={{headerShown: false, presentation: 'transparentModal'}}
+          component={HomeScreen}
+        />
+        <Stack.Screen
+          name="Detail"
+          options={{
+            headerStyle: {
+              backgroundColor: '#262626',
+            },
+          }}
+          component={DetailScreen}
+        />
+        <Stack.Screen
+          name="Post"
+          options={{
+            headerStyle: {
+              backgroundColor: '#262626',
+            },
+            headerBackTitle: '',
+          }}
+          component={PostScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  button: {
-    padding: 24,
-    marginTop: 20,
-    backgroundColor: '#f5c1f5',
-  },
-  titleButton: {
-    fontSize: 14,
-    color: 'black',
-  },
-});
 
 export default App;
