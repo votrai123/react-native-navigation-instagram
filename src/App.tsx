@@ -13,10 +13,11 @@ import HomeScreen from './screens/HomeScreen';
 import PostScreen from './screens/PostScreen';
 import {IPost} from './components/Post';
 import DetailScreen from './screens/DetailScreen';
+import 'react-native-gesture-handler';
 
 export type RootStackParamList = {
   Home: undefined;
-  Detail: {data: string};
+  Detail: {data: {id: number; image: string}};
   Post: {data: IPost};
 };
 

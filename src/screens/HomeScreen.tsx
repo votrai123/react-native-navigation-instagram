@@ -13,7 +13,7 @@ function HomeScreen() {
     <View style={styles.container}>
       <SafeAreaView style={styles.container}>
         <FlatList
-          data={Array.from({length: 10}, (_, index) => ({
+          data={Array.from({length: 5}, (_, index) => ({
             ...HOME_DATA,
             id: index + 1,
           }))}

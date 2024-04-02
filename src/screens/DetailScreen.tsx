@@ -10,7 +10,7 @@ const DetailScreen: React.FC<IProps> = () => {
 
   return (
     <View style={styles.container}>
-      <Image src={data} style={styles.image} />
+      <Image src={data.image} style={styles.image} />
     </View>
   );
 };

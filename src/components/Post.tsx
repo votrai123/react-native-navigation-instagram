@@ -18,7 +18,7 @@ export interface IPost {
   id: number;
   name: string;
   avatar: string;
-  images: string[];
+  images: {id: number; image: string}[];
 }
 
 const {width: WIDTH_SCREEN, height: HEIGHT_SCREEN} = Dimensions.get('window');
@@ -86,7 +86,7 @@ const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
             key={index.toString()}
             activeOpacity={0.9}
             onPress={() => navigation.navigate('Detail', {data: img})}>
-            <Image src={img} resizeMode="cover" style={styles.img} />
+            <Image src={img.image} resizeMode="cover" style={styles.img} />
           </TouchableOpacity>
         ))}
       </ScrollView>
