@@ -1,15 +1,19 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
-import React, {useLayoutEffect} from 'react';
+import React, {useCallback, useLayoutEffect} from 'react';
 import {
   View,
   StyleSheet,
-  Image,
   FlatList,
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../App';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const {width: WIDTH_SCREEN} = Dimensions.get('window');
 
@@ -22,6 +26,7 @@ function PostScreen() {
   const router = useRoute();
   const navigation = useNavigation<DetailScreenNavigationProp>();
   const {data} = router.params;
+  const avatarOpacity = useSharedValue(1);
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: data.name,
@@ -33,20 +38,55 @@ function PostScreen() {
     });
   }, [navigation, data]);
 
+  const avatarAnimated = useAnimatedStyle(() => ({
+    opacity: avatarOpacity.value,
+  }));
+
+  const onBackCallback = useCallback(() => {
+    avatarOpacity.value = withTiming(1, {duration: 300});
+  }, [avatarOpacity]);
+
+  const onNavigateDetail = useCallback(
+    (currentData: {id: number; image: string}) => {
+      avatarOpacity.value = withTiming(0, {duration: 300});
+      navigation.navigate('Detail', {
+        data: currentData,
+        parentId: data.id,
+        callback: onBackCallback,
+        from: 'Post',
+      });
+    },
+    [avatarOpacity, data.id, navigation, onBackCallback],
+  );
+
   return (
-    <View style={styles.container}>
-      <Image src={data.avatar} style={styles.avatar} resizeMode={'center'} />
+    <View style={styles.container} key={'PostDetail' + data.id.toString()}>
+      <Animated.Image
+        src={data.avatar}
+        style={[styles.avatar, avatarAnimated]}
+        resizeMode={'center'}
+      />
       <View style={styles.content}>
         <FlatList
           numColumns={3}
           data={data.images}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={_data => _data.id.toString()}
           renderItem={({item}) => {
             return (
               <TouchableOpacity
-                onPress={() => navigation.navigate('Detail', {data: item})}
+                key={item.id.toString()}
+                onPress={() => onNavigateDetail(item)}
                 activeOpacity={0.9}>
-                <Image src={item} style={styles.image} />
+                <Animated.View
+                  sharedTransitionTag={'Post' + item.id.toString()}>
+                  <Animated.Image
+                    src={item.image}
+                    style={styles.image}
+                    sharedTransitionTag={
+                      'Post' + item.id.toString() + data.id.toString()
+                    }
+                  />
+                </Animated.View>
               </TouchableOpacity>
             );
           }}

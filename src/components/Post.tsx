@@ -1,18 +1,24 @@
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Image,
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
   TouchableOpacity,
+  FlatList,
+  GestureResponderEvent,
 } from 'react-native';
 import {RootStackParamList} from '../App';
 import {useNavigation} from '@react-navigation/native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 export interface IPost {
   id: number;
@@ -30,7 +36,9 @@ type PostScreenNavigationProp = NativeStackNavigationProp<
 
 const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
   const navigation = useNavigation<PostScreenNavigationProp>();
+
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const avatarOpacity = useSharedValue(1);
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const imageIndex = Math.floor(contentOffsetX / WIDTH_SCREEN);
@@ -51,27 +59,50 @@ const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
     );
   }
 
+  const avatarAnimated = useAnimatedStyle(() => ({
+    opacity: avatarOpacity.value,
+  }));
+
+  const onBackCallback = useCallback(() => {
+    avatarOpacity.value = withTiming(1, {duration: 300});
+  }, [avatarOpacity]);
+
+  const onNavigatePost = useCallback(
+    (event: GestureResponderEvent) => {
+      event.stopPropagation();
+      navigation.navigate('Post', {
+        data: {
+          id,
+          images,
+          avatar,
+          name,
+        },
+      });
+    },
+    [navigation, id, images, avatar, name],
+  );
+
+  const onNavigateDetail = useCallback(
+    (data: {id: number; image: string}) => {
+      avatarOpacity.value = withTiming(0, {duration: 300});
+      navigation.navigate('Detail', {
+        data,
+        parentId: id,
+        callback: onBackCallback,
+      });
+    },
+    [avatarOpacity, id, navigation, onBackCallback],
+  );
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={event => {
-          event.stopPropagation();
-          navigation.navigate('Post', {
-            data: {
-              id,
-              images,
-              avatar,
-              name,
-            },
-          });
-        }}
-        style={styles.header}>
-        <View style={styles.headerContent}>
+      <TouchableOpacity onPress={onNavigatePost} style={styles.header}>
+        <Animated.View style={[styles.headerContent, avatarAnimated]}>
           <Image src={avatar} resizeMode="center" style={styles.avatar} />
           <Text>{name}</Text>
-        </View>
+        </Animated.View>
       </TouchableOpacity>
-      <ScrollView
+      <FlatList
         horizontal
         decelerationRate={0}
         snapToInterval={WIDTH_SCREEN}
@@ -79,17 +110,26 @@ const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
         snapToAlignment={'center'}
         pagingEnabled
         scrollEventThrottle={200}
+        keyExtractor={data => data.id.toString()}
         contentContainerStyle={{width: WIDTH_SCREEN * images.length}}
-        showsHorizontalScrollIndicator={false}>
-        {images.map((img, index) => (
+        showsHorizontalScrollIndicator={false}
+        data={images}
+        renderItem={({item}) => (
           <TouchableOpacity
-            key={index.toString()}
+            key={item.id.toString()}
             activeOpacity={0.9}
-            onPress={() => navigation.navigate('Detail', {data: img})}>
-            <Image src={img.image} resizeMode="cover" style={styles.img} />
+            onPress={() => onNavigateDetail(item)}>
+            <Animated.View sharedTransitionTag={item.id.toString()}>
+              <Animated.Image
+                src={item.image}
+                resizeMode="cover"
+                style={styles.img}
+                sharedTransitionTag={item.id.toString() + id}
+              />
+            </Animated.View>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+      />
       <View style={styles.bullets}>{bullets}</View>
     </View>
   );
@@ -100,7 +140,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: HEIGHT_SCREEN * 0.7,
     position: 'relative',
-    marginBottom: 30,
   },
   img: {
     width: WIDTH_SCREEN,

@@ -13,10 +13,7 @@ function HomeScreen() {
     <View style={styles.container}>
       <SafeAreaView style={styles.container}>
         <FlatList
-          data={Array.from({length: 5}, (_, index) => ({
-            ...HOME_DATA,
-            id: index + 1,
-          }))}
+          data={HOME_DATA}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem}
           getItemLayout={(data, index) => ({
