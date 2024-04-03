@@ -16,6 +16,7 @@ function HomeScreen() {
           data={HOME_DATA}
           showsVerticalScrollIndicator={false}
           renderItem={renderItem}
+          extraData={HOME_DATA}
           getItemLayout={(data, index) => ({
             length: HEIGHT_SCREEN * 0.7,
             offset: HEIGHT_SCREEN * 0.7 * index,

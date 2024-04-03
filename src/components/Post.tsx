@@ -89,6 +89,7 @@ const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
         data,
         parentId: id,
         callback: onBackCallback,
+        from: 'List',
       });
     },
     [avatarOpacity, id, navigation, onBackCallback],
@@ -119,12 +120,12 @@ const Post: React.FC<IPost> = ({id, images, avatar, name}) => {
             key={item.id.toString()}
             activeOpacity={0.9}
             onPress={() => onNavigateDetail(item)}>
-            <Animated.View sharedTransitionTag={item.id.toString()}>
+            <Animated.View sharedTransitionTag={'List' + item.id.toString()}>
               <Animated.Image
                 src={item.image}
                 resizeMode="cover"
                 style={styles.img}
-                sharedTransitionTag={item.id.toString() + id}
+                sharedTransitionTag={'List' + item.id.toString() + id}
               />
             </Animated.View>
           </TouchableOpacity>

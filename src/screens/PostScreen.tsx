@@ -70,6 +70,7 @@ function PostScreen() {
         <FlatList
           numColumns={3}
           data={data.images}
+          extraData={data.images}
           keyExtractor={_data => _data.id.toString()}
           renderItem={({item}) => {
             return (

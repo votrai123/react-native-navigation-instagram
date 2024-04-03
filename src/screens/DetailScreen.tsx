@@ -1,6 +1,6 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import React, {useMemo} from 'react';
+import React, {useLayoutEffect, useMemo} from 'react';
 import {StyleSheet} from 'react-native';
 import {Gesture, GestureDetector} from 'react-native-gesture-handler';
 import Animated, {
@@ -38,7 +38,7 @@ const DetailScreen: React.FC<IProps> = () => {
           value.translationY * value.translationY,
       );
       const scaleValue = Math.min(Math.max(distance / 100, 1), 0.9);
-      scale.value = withTiming(scaleValue, {duration: 100});
+      scale.value = withTiming(scaleValue, {duration: 300});
     })
     .onEnd(() => {
       if (translateY.value > 50 || translateX.value > 90) {
@@ -46,10 +46,10 @@ const DetailScreen: React.FC<IProps> = () => {
         callback && runOnJS(callback)();
         runOnJS(navigation.goBack)();
       } else {
-        translateX.value = withTiming(0, {duration: 300});
-        translateY.value = withTiming(0, {duration: 300});
+        translateX.value = withTiming(0, {duration: 100});
+        translateY.value = withTiming(0, {duration: 100});
         scale.value = withTiming(1, {duration: 300});
-        opacity.value = withTiming(1, {duration: 300});
+        opacity.value = withTiming(1, {duration: 400});
       }
     });
 
